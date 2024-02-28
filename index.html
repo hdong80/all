@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>출석체크 명단</title>
+    <!-- Google Fonts에서 Dongle 폰트 가져오기 -->
+    <link href="https://fonts.googleapis.com/css2?family=Dongle:wght@300&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Dongle', sans-serif;
+            font-size: 150%;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background-color: #f0f8ff;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 720px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .participant {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 8px;
+            margin-bottom: 8px;
+            width: 100%;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .participant-img {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+
+        .participant div, .participant a {
+            margin: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 120%;
+            font-weight: bold;
+            text-decoration: none;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 학년 선택 컨트롤 박스 -->
+<div>
+    <label for="grade-select">학년 선택:</label>
+    <select id="grade-select">
+        <option value="all">전체</option>
+        <option value="201">201</option>
+        <option value="202">202</option>
+        <option value="203">203</option>
+        <option value="204">204</option>
+        <option value="205">205</option>
+        <option value="206">206</option>
+        <option value="207">207</option>
+        <option value="208">208</option>
+        <option value="209">209</option>
+        <option value="210">210</option>
+        <option value="211">211</option>
+    </select>
+</div>
+
+<!-- 참가자 명단을 표시할 컨테이너 -->
+<div id="participants" class="container"></div>
+
+<script>
+    async function fetchSheetData() {
+        const sheetId = '1JsMGoD5enBE0EtMfihOy_58HcG1dzcDfEtxn2M0Y65Q'; // 구글 시트 ID
+        const apiKey = 'AIzaSyDrClgUbT-0cFoYe4W81dyxikZVbjVlcT8'; // Google Sheets API 키
+        const range = 'all!A2:E400'; // 범위
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?key=${apiKey}`;
+
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            return data.values;
+        } catch (error) {
+            console.error('Error fetching sheet data:', error);
+            return [];
+        }
+    }
+
+    async function displayParticipants() {
+        const data = await fetchSheetData();
+        const container = document.getElementById('participants');
+        container.innerHTML = ''; // 기존 데이터 제거
+
+        const selectedGrade = document.getElementById('grade-select').value;
+
+        // 선택된 옵션에 따라 필터링 및 정렬
+        const filteredData = data.filter(participantData => {
+            const grade = participantData[0].slice(0, 3);
+            return selectedGrade === 'all' || grade === selectedGrade;
+        });
+
+        // 전체를 선택한 경우 학번을 기준으로 오름차순 정렬
+        if (selectedGrade === 'all') {
+            filteredData.sort((a, b) => a[0].localeCompare(b[0]));
+        }
+
+        filteredData.forEach(participantData => {
+            const [studentId, name, phoneNumber, additionalPhoneNumber, photoUrl] = participantData;
+
+            const participantDiv = document.createElement('div');
+            participantDiv.classList.add('participant');
+
+            const studentIdDiv = document.createElement('div');
+            studentIdDiv.textContent = studentId;
+            studentIdDiv.classList.add('student-id');
+
+            const nameDiv = document.createElement('div');
+            nameDiv.textContent = name || '-';
+
+            participantDiv.appendChild(studentIdDiv);
+            participantDiv.appendChild(nameDiv);
+
+            if (photoUrl) {
+                const img = document.createElement('img');
+                img.src = photoUrl;
+                img.alt = 'Participant Image';
+                img.classList.add('participant-img');
+                participantDiv.appendChild(img);
+            }
+
+            container.appendChild(participantDiv);
+        });
+    }
+
+    // 학년 선택 시 이벤트 처리
+    document.getElementById('grade-select').addEventListener('change', () => {
+        displayParticipants();
+    });
+
+    // 페이지 로드 시 초기 데이터 표시
+    window.onload = () => {
+        displayParticipants();
+    };
+</script>
+
+</body>
+</html>
