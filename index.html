@@ -1,164 +1,770 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>출석체크 명단</title>
-    <!-- Google Fonts에서 Dongle 폰트 가져오기 -->
-    <link href="https://fonts.googleapis.com/css2?family=Dongle:wght@300&display=swap" rel="stylesheet">
+    <title>풍문 생기부 기본룰검사기</title>
     <style>
-        body {
-            font-family: 'Dongle', sans-serif;
-            font-size: 150%;
+        * {
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            background-color: #f0f8ff;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
         }
 
         .container {
-            width: 90%;
-            max-width: 720px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
 
-        .participant {
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .text-areas {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .text-section {
             display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            background-color: #ffffff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 8px;
-            margin-bottom: 8px;
+            flex-direction: column;
+        }
+
+        .text-section h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .textarea-container {
+            position: relative;
+            flex: 1;
+        }
+
+        textarea {
             width: 100%;
-            cursor: pointer;
+            height: 400px;
+            padding: 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: vertical;
+            font-family: 'Malgun Gothic', sans-serif;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        #output {
+            background-color: #f8f9fa;
+            cursor: text;
+        }
+
+        .output-container {
             position: relative;
         }
 
-        .participant-img {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            object-fit: contain;
-            margin-bottom: 10px;
+        .highlight-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 20px;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.6;
+            font-family: 'Malgun Gothic', sans-serif;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow: auto;
+            pointer-events: none;
+            background: transparent;
+            color: transparent;
         }
 
-        .participant div, .participant a {
-            margin: 5px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-size: 120%;
-            font-weight: bold;
-            text-decoration: none;
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+            font-size: 18px;
+            padding: 15px 40px;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .info-panel {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-item h4 {
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .info-item .value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .status-board {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #e1e5e9;
+        }
+
+        .status-board h4 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .status-list {
+            list-style: none;
+        }
+
+        .status-item {
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            font-size: 14px;
+            border-left: 4px solid transparent;
+        }
+
+        .status-item.success {
+            background: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+
+        .status-item.warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+            color: #856404;
+        }
+
+        .status-item.error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+
+        .status-item.info {
+            background: #d1ecf1;
+            border-left-color: #17a2b8;
+            color: #0c5460;
+        }
+
+        /* 하이라이트 스타일 */
+        .highlight-forbidden {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 2px 4px;
+            border-radius: 3px;
+            border: 1px solid #ef5350;
+        }
+
+        .highlight-allowed {
+            background-color: #e8f5e8;
+            color: #2e7d32;
+            padding: 2px 4px;
+            border-radius: 3px;
+            border: 1px solid #66bb6a;
+        }
+
+        .highlight-smart-quote {
+            background-color: #fff3e0;
+            color: #f57c00;
+            padding: 2px 4px;
+            border-radius: 3px;
+            border: 1px solid #ffb74d;
+        }
+
+        .highlight-spacing {
+            background-color: #e3f2fd;
+            color: #1976d2;
+            padding: 2px 4px;
+            border-radius: 3px;
+            border: 1px solid #64b5f6;
+        }
+
+        .highlight-date {
+            background-color: #f3e5f5;
+            color: #7b1fa2;
+            padding: 2px 4px;
+            border-radius: 3px;
+            border: 1px solid #ba68c8;
+        }
+
+        .highlight-period {
+            background-color: #fce4ec;
+            color: #c2185b;
+            padding: 2px 4px;
+            border-radius: 3px;
+            border: 1px solid #f06292;
+        }
+
+        @media (max-width: 768px) {
+            .text-areas {
+                grid-template-columns: 1fr;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+        }
+
+        .loading {
             text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+
+        .copy-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+        }
+
+        .copy-notification.show {
+            opacity: 1;
+            transform: translateY(0);
         }
     </style>
 </head>
 <body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 풍문 생기부 기본룰검사기</h1>
+            <p>생활기록부 작성 시 기본 규칙을 자동으로 검증하고 수정해드립니다</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="text-areas">
+                <div class="text-section">
+                    <h3>📝 원본 텍스트</h3>
+                    <div class="textarea-container">
+                        <textarea id="input" placeholder="생활기록부 내용을 여기에 붙여넣어 주세요..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="text-section">
+                    <h3>✅ 수정된 텍스트</h3>
+                    <div class="textarea-container output-container">
+                        <textarea id="output" placeholder="수정된 내용이 여기에 표시됩니다..."></textarea>
+                        <div id="highlightOverlay" class="highlight-overlay"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-secondary" onclick="resetAll()">🔄 리셋</button>
+                <button class="btn btn-success" onclick="copyToClipboard()">📋 수정된 내용 복사</button>
+            </div>
+            
+            <div class="info-panel">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <h4>원본 글자 수</h4>
+                        <div class="value" id="originalCount">0</div>
+                    </div>
+                    <div class="info-item">
+                        <h4>수정 후 글자 수</h4>
+                        <div class="value" id="modifiedCount">0</div>
+                    </div>
+                    <div class="info-item">
+                        <h4>원본 바이트 수</h4>
+                        <div class="value" id="originalBytes">0</div>
+                    </div>
+                    <div class="info-item">
+                        <h4>수정 후 바이트 수</h4>
+                        <div class="value" id="modifiedBytes">0</div>
+                    </div>
+                </div>
+                
+                <div class="status-board">
+                    <h4>📊 검증 현황</h4>
+                    <ul class="status-list" id="statusList">
+                        <li class="status-item info">텍스트를 입력하면 자동으로 검증이 시작됩니다.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="copy-notification" id="copyNotification">
+        📋 클립보드에 복사되었습니다!
+    </div>
 
-<!-- 학년 선택 컨트롤 박스 -->
-<div>
-    <label for="grade-select">학년 선택:</label>
-    <select id="grade-select">
-        <option value="all">전체</option>
-        <option value="201">201</option>
-        <option value="202">202</option>
-        <option value="203">203</option>
-        <option value="204">204</option>
-        <option value="205">205</option>
-        <option value="206">206</option>
-        <option value="207">207</option>
-        <option value="208">208</option>
-        <option value="209">209</option>
-        <option value="210">210</option>
-        <option value="211">211</option>
-    </select>
-</div>
+    <script>
+        // 전역 변수
+        let forbiddenWords = [];
+        let allowedWords = [];
+        let isDataLoaded = false;
 
-<!-- 참가자 명단을 표시할 컨테이너 -->
-<div id="participants" class="container"></div>
-
-<script>
-    async function fetchSheetData() {
-        const sheetId = '1JsMGoD5enBE0EtMfihOy_58HcG1dzcDfEtxn2M0Y65Q'; // 구글 시트 ID
-        const apiKey = 'AIzaSyDrClgUbT-0cFoYe4W81dyxikZVbjVlcT8'; // Google Sheets API 키
-        const range = 'all!A2:E400'; // 범위
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?key=${apiKey}`;
-
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
-            return data.values;
-        } catch (error) {
-            console.error('Error fetching sheet data:', error);
-            return [];
-        }
-    }
-
-    async function displayParticipants() {
-        const data = await fetchSheetData();
-        const container = document.getElementById('participants');
-        container.innerHTML = ''; // 기존 데이터 제거
-
-        const selectedGrade = document.getElementById('grade-select').value;
-
-        // 선택된 옵션에 따라 필터링 및 정렬
-        const filteredData = data.filter(participantData => {
-            const grade = participantData[0].slice(0, 3);
-            return selectedGrade === 'all' || grade === selectedGrade;
-        });
-
-        // 전체를 선택한 경우 학번을 기준으로 오름차순 정렬
-        if (selectedGrade === 'all') {
-            filteredData.sort((a, b) => a[0].localeCompare(b[0]));
-        }
-
-        filteredData.forEach(participantData => {
-            const [studentId, name, phoneNumber, additionalPhoneNumber, photoUrl] = participantData;
-
-            const participantDiv = document.createElement('div');
-            participantDiv.classList.add('participant');
-
-            const studentIdDiv = document.createElement('div');
-            studentIdDiv.textContent = studentId;
-            studentIdDiv.classList.add('student-id');
-
-            const nameDiv = document.createElement('div');
-            nameDiv.textContent = name || '-';
-
-            participantDiv.appendChild(studentIdDiv);
-            participantDiv.appendChild(nameDiv);
-
-            if (photoUrl) {
-                const img = document.createElement('img');
-                img.src = photoUrl;
-                img.alt = 'Participant Image';
-                img.classList.add('participant-img');
-                participantDiv.appendChild(img);
+        // CSV 데이터 로드
+        async function loadCSVData() {
+            try {
+                const csvUrl = 'https://docs.google.com/spreadsheets/d/1HPZs_EOAlW9DBbfdw_b2dZdGiRsXSeFgg3XRKy3ITT8/export?format=csv&gid=0';
+                
+                addStatus('CSV 데이터를 로드하는 중...', 'info');
+                
+                const response = await fetch(csvUrl);
+                const csvText = await response.text();
+                
+                const lines = csvText.split('\n');
+                // 헤더 제외하고 데이터 파싱
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (line) {
+                        const columns = line.split(',').map(col => col.trim().replace(/"/g, ''));
+                        if (columns[0]) forbiddenWords.push(columns[0]);
+                        if (columns[1]) allowedWords.push(columns[1]);
+                    }
+                }
+                
+                isDataLoaded = true;
+                addStatus(`금지어 ${forbiddenWords.length}개, 허용어 ${allowedWords.length}개 로드 완료`, 'success');
+                
+                // 입력 텍스트가 있으면 다시 처리
+                const inputText = document.getElementById('input').value;
+                if (inputText.trim()) {
+                    processText();
+                }
+            } catch (error) {
+                console.error('CSV 로드 실패:', error);
+                addStatus('CSV 데이터 로드에 실패했습니다. 기본 기능만 사용됩니다.', 'error');
+                isDataLoaded = false;
             }
+        }
 
-            container.appendChild(participantDiv);
+        // 바이트 수 계산 (UTF-8)
+        function getByteLength(str) {
+            return new Blob([str]).size;
+        }
+
+        // 상태 메시지 추가
+        function addStatus(message, type = 'info') {
+            const statusList = document.getElementById('statusList');
+            const li = document.createElement('li');
+            li.className = `status-item ${type}`;
+            li.textContent = message;
+            
+            // 기존 메시지가 많으면 오래된 것 제거
+            if (statusList.children.length > 10) {
+                statusList.removeChild(statusList.firstChild);
+            }
+            
+            statusList.appendChild(li);
+            statusList.scrollTop = statusList.scrollHeight;
+        }
+
+        // 스마트 부호 변환
+        function convertSmartQuotes(text) {
+            const conversions = {
+                '"': '"',  // 왼쪽 큰따옴표
+                '"': '"',  // 오른쪽 큰따옴표
+                ''': "'",  // 왼쪽 작은따옴표
+                ''': "'",  // 오른쪽 작은따옴표
+                '…': '...',  // 줄임표
+                '–': '-',  // en dash
+                '—': '-',  // em dash
+            };
+            
+            let result = text;
+            let hasSmartQuotes = false;
+            
+            for (const [smart, regular] of Object.entries(conversions)) {
+                if (result.includes(smart)) {
+                    hasSmartQuotes = true;
+                    result = result.replace(new RegExp(smart, 'g'), regular);
+                }
+            }
+            
+            if (hasSmartQuotes) {
+                addStatus('스마트 부호를 일반 부호로 변환했습니다', 'success');
+            }
+            
+            return result;
+        }
+
+        // 공백 정리
+        function normalizeSpacing(text) {
+            const original = text;
+            const result = text.replace(/\s{2,}/g, ' ');
+            
+            if (original !== result) {
+                addStatus('두 칸 이상의 공백을 한 칸으로 정리했습니다', 'success');
+            }
+            
+            return result;
+        }
+
+        // 마침표 검사
+        function checkFinalPeriod(text) {
+            const trimmed = text.trim();
+            if (trimmed && !trimmed.endsWith('.') && !trimmed.endsWith('!') && !trimmed.endsWith('?')) {
+                addStatus('문장 마지막에 마침표가 없습니다. 마침표 추가를 권장합니다.', 'warning');
+                return false;
+            }
+            return true;
+        }
+
+        // 날짜 형식 검증
+        function validateDateFormat(text) {
+            // 괄호 안의 날짜 패턴 찾기
+            const datePattern = /\(([^)]+)\)/g;
+            let match;
+            let hasInvalidDate = false;
+            
+            while ((match = datePattern.exec(text)) !== null) {
+                const content = match[1];
+                
+                // 날짜로 보이는 패턴 (숫자와 점 또는 쉼표 포함)
+                if (/\d/.test(content) && (/\./.test(content) || /,/.test(content))) {
+                    // 올바른 날짜 형식 검사
+                    const validDatePattern = /^\d{4}\.\d{2}\.\d{2}\.(?:\/\d+시간\.)?$|^\d{4}\.\d{2}\.\d{2}\.-\d{4}\.\d{2}\.\d{2}\.$|^\d{4}\.\d{2}\.\d{2}\.\/\d+시간\.$|^\d{4}\.\d{2}\.\d{2}\.$|^\d{4}\.\d{2}\.\d{2}\.-\d{4}\.\d{2}\.\d{2}\.$|^\d{4}\.\d{2}\.\d{2}\.\/\d+시간\.$|^\d{4}\.\d{2}\.\d{2}\.$|^\d{4}\.\d{2}\.\d{2}\.-\d{4}\.\d{2}\.\d{2}\.$|^\d{4}\.\d{2}\.\d{2}\.\/\d+시간\.$|^\d{4}\.\d{2}\.\d{2}\.$|^\d{4}\.\d{2}\.\d{2}\.-\d{4}\.\d{2}\.\d{2}\.$|^\d{4}\.\d{2}\.\d{2}\.\/\d+시간\.$|^\d{4}\.\d{2}\.\d{2}\.$|^\d{4}\.\d{2}\.\d{2}\.-\d{4}\.\d{2}\.\d{2}\.$|^\d{4}\.\d{2}\.\d{2}\.\/\d+시간\.$|^\d{4}\.\d{2}\.\d{2}\.$|^\d{4}\.\d{2}\.\d{2}\.-\d{4}\.\d{2}\.\d{2}\.$|^\d{4}\.\d{2}\.\d{2}\.\/\d+시간\.$|^\d{4}\.\d{2}\.\d{2}\.$|^\d{4}\.\d{2}\.\d{2}\.-\d{4}\.\d{2}\.\d{2}\.$|^\d{4}\.\d{2}\.\d{2}\.\/\d+시간\.$|^\d{4}\.\d{2}\.\d{2}\.$|^\d{4}\.\d{2}\.\d{2}\.-\d{4}\.\d{2}\.\d{2}\.$|^\d{4}\.\d{2}\.\d{2}\.\/\d+시간\.$/;
+                    
+                    // 간단한 날짜 형식 검증
+                    const hasOnlyValidChars = /^[\d.\-\/시간]+$/.test(content);
+                    const hasProperDateStructure = /\d{4}\.\d{1,2}\.\d{1,2}/.test(content);
+                    
+                    if (!hasOnlyValidChars || !hasProperDateStructure) {
+                        hasInvalidDate = true;
+                        addStatus(`날짜 형식이 올바르지 않습니다: (${content}) → 올바른 형식: (2025.06.07.) 또는 (2025.03.19.-2025.08.09.)`, 'error');
+                    }
+                }
+            }
+            
+            return !hasInvalidDate;
+        }
+
+        // 텍스트에 하이라이트 적용
+        function applyHighlights(text) {
+            let result = text;
+            
+            // 금지어 하이라이트 (정확한 매칭)
+            forbiddenWords.forEach(word => {
+                if (word) {
+                    // 한글 금지어는 단어 경계 없이 검사
+                    if (/[가-힣]/.test(word)) {
+                        const regex = new RegExp(word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+                        result = result.replace(regex, `<span class="highlight-forbidden">$&</span>`);
+                    } else {
+                        // 영어 금지어는 단어 경계와 함께 검사
+                        const regex = new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+                        result = result.replace(regex, `<span class="highlight-forbidden">$&</span>`);
+                    }
+                }
+            });
+            
+            // 허용 영어단어 하이라이트
+            allowedWords.forEach(word => {
+                if (word) {
+                    const regex = new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+                    result = result.replace(regex, `<span class="highlight-allowed">$&</span>`);
+                }
+            });
+            
+            // 잘못된 날짜 형식 하이라이트
+            const datePattern = /\(([^)]+)\)/g;
+            result = result.replace(datePattern, (match, content) => {
+                if (/\d/.test(content) && (/\./.test(content) || /,/.test(content))) {
+                    const hasOnlyValidChars = /^[\d.\-\/시간\s]+$/.test(content);
+                    const hasProperDateStructure = /\d{4}\.\d{1,2}\.\d{1,2}/.test(content);
+                    
+                    if (!hasOnlyValidChars || !hasProperDateStructure) {
+                        return `<span class="highlight-date">${match}</span>`;
+                    }
+                }
+                return match;
+            });
+            
+            return result;
+        }
+
+        // 하이라이트 오버레이 업데이트
+        function updateHighlightOverlay(text) {
+            const overlay = document.getElementById('highlightOverlay');
+            if (overlay && isDataLoaded) {
+                const highlightedText = applyHighlights(text);
+                overlay.innerHTML = highlightedText;
+            }
+        }
+
+        // 메인 텍스트 처리 함수
+        function processText() {
+            const input = document.getElementById('input').value;
+            const output = document.getElementById('output');
+            
+            if (!input.trim()) {
+                output.value = '';
+                updateStats('', '');
+                clearStatus();
+                return;
+            }
+            
+            clearStatus();
+            
+            // 1. 공백 정리
+            let processed = normalizeSpacing(input);
+            
+            // 2. 스마트 부호 변환
+            processed = convertSmartQuotes(processed);
+            
+            // 3. 마침표 검사
+            checkFinalPeriod(processed);
+            
+            // 4. 날짜 형식 검증
+            validateDateFormat(processed);
+            
+            // 5. 단어 검증 (데이터가 로드된 경우)
+            if (isDataLoaded) {
+                checkWords(processed);
+            }
+            
+            // 결과 출력
+            output.value = processed;
+            
+            // 하이라이트 오버레이 업데이트
+            updateHighlightOverlay(processed);
+            
+            // 통계 업데이트
+            updateStats(input, processed);
+        }
+
+        // 단어 검증
+        function checkWords(text) {
+            // 금지어 검사 (정확한 단어 매칭)
+            forbiddenWords.forEach(word => {
+                if (word) {
+                    const regex = new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+                    if (regex.test(text)) {
+                        addStatus(`금지어 발견: "${word}" - 교무기획부에 문의해주세요`, 'error');
+                    }
+                }
+            });
+            
+            // 영어 단어 검사
+            const englishWords = text.match(/[a-zA-Z]+/g) || [];
+            const uniqueWords = [...new Set(englishWords.map(w => w.toLowerCase()))];
+            
+            uniqueWords.forEach(word => {
+                const isAllowed = allowedWords.some(allowed => 
+                    allowed && allowed.toLowerCase() === word.toLowerCase()
+                );
+                const isForbidden = forbiddenWords.some(forbidden => 
+                    forbidden && forbidden.toLowerCase() === word.toLowerCase()
+                );
+                
+                if (isAllowed) {
+                    addStatus(`허용어 사용: "${word}" - 사용 가능한 영어 단어입니다`, 'success');
+                } else if (!isForbidden) {
+                    addStatus(`영어 단어 발견: "${word}" - 한글로 바꾸거나 읽히는 대로 한글로 적는 것을 권장합니다`, 'warning');
+                }
+            });
+        }
+
+        // 통계 업데이트
+        function updateStats(original, modified) {
+            document.getElementById('originalCount').textContent = original.length;
+            document.getElementById('modifiedCount').textContent = modified.length;
+            document.getElementById('originalBytes').textContent = getByteLength(original);
+            document.getElementById('modifiedBytes').textContent = getByteLength(modified);
+        }
+
+        // 상태 초기화
+        function clearStatus() {
+            const statusList = document.getElementById('statusList');
+            statusList.innerHTML = '';
+        }
+
+        // 클립보드 복사
+        async function copyToClipboard() {
+            const output = document.getElementById('output').value;
+            
+            if (!output.trim()) {
+                addStatus('복사할 내용이 없습니다', 'warning');
+                return;
+            }
+            
+            try {
+                await navigator.clipboard.writeText(output);
+                showCopyNotification();
+                addStatus('수정된 내용이 클립보드에 복사되었습니다', 'success');
+            } catch (err) {
+                console.error('복사 실패:', err);
+                addStatus('클립보드 복사에 실패했습니다', 'error');
+            }
+        }
+
+        // 복사 알림 표시
+        function showCopyNotification() {
+            const notification = document.getElementById('copyNotification');
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // 리셋
+        function resetAll() {
+            document.getElementById('input').value = '';
+            document.getElementById('output').value = '';
+            updateStats('', '');
+            clearStatus();
+            addStatus('초기화되었습니다', 'info');
+        }
+
+        // 이벤트 리스너
+        document.addEventListener('DOMContentLoaded', function() {
+            const input = document.getElementById('input');
+            
+            // 실시간 처리
+            input.addEventListener('input', processText);
+            
+            // CSV 데이터 로드
+            loadCSVData();
         });
-    }
 
-    // 학년 선택 시 이벤트 처리
-    document.getElementById('grade-select').addEventListener('change', () => {
-        displayParticipants();
-    });
-
-    // 페이지 로드 시 초기 데이터 표시
-    window.onload = () => {
-        displayParticipants();
-    };
-</script>
-
+        // 출력 텍스트 수정 시 재검증
+        document.getElementById('output').addEventListener('input', function() {
+            const outputText = this.value;
+            
+            // 재검증
+            clearStatus();
+            checkFinalPeriod(outputText);
+            validateDateFormat(outputText);
+            
+            if (isDataLoaded) {
+                checkWords(outputText);
+            }
+            
+            // 하이라이트 오버레이 업데이트
+            updateHighlightOverlay(outputText);
+            
+            // 통계 업데이트
+            const originalText = document.getElementById('input').value;
+            updateStats(originalText, outputText);
+        });
+    </script>
 </body>
 </html>
