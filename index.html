@@ -1,3 +1,74 @@
+<!doctype html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>풍문 생기부 기본룰 검사기</title>
+	<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+	<header class="app-header">
+		<h1>풍문 생기부 기본룰 검사기</h1>
+		<div class="controls">
+			<label class="inline">
+				<span>구글시트 시트명</span>
+				<input id="sheetName" type="text" value="풍문" />
+			</label>
+			<label class="inline fill">
+				<span>스프레드시트 ID</span>
+				<input id="sheetId" type="text" value="1HPZs_EOAlW9DBbfdw_b2dZdGiRsXSeFgg3XRKy3ITT8" />
+			</label>
+			<button id="btnReloadCsv" title="금지어/허용어 새로 불러오기">목록 새로고침</button>
+			<span id="csvStatus" class="status-pill">불러오는 중…</span>
+		</div>
+	</header>
+
+	<main class="layout">
+		<section class="pane left">
+			<h2>원본</h2>
+			<textarea id="inputOriginal" placeholder="왼쪽에 원본을 붙여넣으세요"></textarea>
+			<div class="subheader">
+				<strong>원본 하이라이트 미리보기</strong>
+				<small>(금지어는 빨간색, 허용 영어는 초록색, 기타 영어 사용은 주황색)</small>
+			</div>
+			<div id="originalPreview" class="preview"></div>
+		</section>
+
+		<section class="pane right">
+			<h2>수정본</h2>
+			<div class="actions">
+				<button id="btnCopy" class="primary">수정본 복사</button>
+				<button id="btnReset" class="ghost">리셋</button>
+				<div class="bytes" title="UTF-8 기준 바이트 수"><span>0</span> bytes</div>
+			</div>
+			<div id="outputEditable" class="editable" contenteditable="true" spellcheck="false"></div>
+			<div class="legend">
+				<span class="chip changed">자동수정</span>
+				<span class="chip banned">금지어</span>
+				<span class="chip allowed">허용 영어</span>
+				<span class="chip english">영어 주의</span>
+				<span class="chip date-warn">날짜 확인</span>
+			</div>
+		</section>
+
+		<aside class="status-board">
+			<h2>현황 보드</h2>
+			<ul id="statusList" class="status-list"></ul>
+			<div class="notes">
+				<ul>
+					<li>영어 사용 시: 한글로 바꾸거나 읽히는 대로 한글로 적어서 사용하는 것을 권장합니다.</li>
+					<li>허용되는 영어 단어는 초록색으로 표시되며 그대로 사용하셔도 됩니다.</li>
+					<li>금지어는 빨간색으로 표시됩니다. 금지어라고 해서 무조건 못 쓰는 것은 아니지만, 사용 여부가 궁금하시면 교무기획부에 문의해 주세요.</li>
+					<li>수정 자동 적용: 두 칸 이상의 공백 축약, 스마트부호 → 일반부호.</li>
+					<li>그 외 항목은 수정본 영역에서 직접 수정하면 색 표시가 사라집니다.</li>
+				</ul>
+			</div>
+		</aside>
+	</main>
+
+	<script src="app.js"></script>
+</body>
+</html>
 <!DOCTYPE html>
 <html lang="en">
 <head>
